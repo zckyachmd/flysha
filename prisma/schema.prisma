@@ -39,9 +39,20 @@ model User {
   passport String?
   role     UserRole
 
-  Tickets Ticket[]
+  Tickets  Ticket[]
+  Sessions Session[]
 
   @@map("users")
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+
+  user User @relation(references: [id], fields: [userId], onDelete: Cascade)
+
+  @@map("sessions")
 }
 
 model Airplane {
