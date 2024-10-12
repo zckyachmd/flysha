@@ -9,6 +9,97 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum SeatType {
+  Economic
+  Business
+  First
+}
+
+enum TicketStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id       String   @id @default(cuid())
+  name     String
+  email    String   @unique
+  password String
+  passport String?
+  role     UserRole
+
+  Tickets Ticket[]
+
+  @@map("users")
+}
+
+model Airplane {
+  id    String @id @default(cuid())
+  code  String @default("ABC-123")
+  name  String
+  image String
+
+  Flight Flight[]
+
+  @@map("airplanes")
+}
+
+model Flight {
+  id                  String   @id @default(cuid())
+  airplaneId          String
+  departureDate       DateTime
+  departureCity       String
+  departureCityCode   String
+  arrivalDate         DateTime
+  destinationCity     String
+  destinationCityCode String
+  price               Int
+
+  airplane    Airplane     @relation(fields: [airplaneId], references: [id])
+  FlightSeats FlightSeat[]
+  Tickets     Ticket[]
+
+  @@map("flights")
+}
+
+model FlightSeat {
+  id         String   @id @default(cuid())
+  flightId   String
+  seatNumber String
+  isBooked   Boolean? @default(false)
+  seatType   SeatType
+
+  flight Flight  @relation(fields: [flightId], references: [id])
+  Ticket Ticket?
+
+  @@map("flight_seats")
+}
+
+model Ticket {
+  id               String       @id @default(cuid())
+  code             String       @unique
+  flightId         String
+  customerId       String
+  seatId           String       @unique
+  bookingDate      DateTime
+  price            BigInt
+  status           TicketStatus
+  tokenTransaction String
+
+  flight   Flight     @relation(fields: [flightId], references: [id])
+  customer User       @relation(fields: [customerId], references: [id])
+  seat     FlightSeat @relation(fields: [seatId], references: [id])
+
+  @@map("tickets")
 }
