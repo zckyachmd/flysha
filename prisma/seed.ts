@@ -7,7 +7,7 @@ const bycrypt = new Bcrypt();
 const users = [
   {
     name: "Admin",
-    email: "admin@admin",
+    email: "admin@mail.com",
     role: UserRole.ADMIN,
   },
 ];
